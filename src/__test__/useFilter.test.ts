@@ -176,6 +176,25 @@ describe("#filterData", () => {
     ).toEqual([items[1]]);
   });
 
+  test("filters by a multi layered property with an array with multiple selections", () => {
+    expect(
+      filterData(
+        items,
+        [
+          { key: "creators", value: "Keith Giffen" },
+          { key: "creators", value: "Andy Schmidt" }
+        ],
+        [
+          {
+            key: "creators",
+            values: creators,
+            properties: ["items", "name"]
+          }
+        ]
+      )
+    ).toEqual([items[1]]);
+  });
+
   test("filters with multiple selections", () => {
     expect(
       filterData(
