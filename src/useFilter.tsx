@@ -1,5 +1,5 @@
 import * as React from "react";
-import _ from "lodash";
+import * as _ from "lodash";
 
 interface Props {
   facets?: Array<{
@@ -16,34 +16,50 @@ interface State {
   filterableData?: Array<any>;
 }
 
+export const buildProperty = (
+  item: object | Array<any>,
+  nextValues: Array<string>,
+  starts?: string
+) => {
+  if (Array.isArray(item)) {
+    return item.map(i => buildProperty(i, nextValues));
+  }
+
+  const [nextValue, ...remainingValues] = nextValues;
+  const newItem = _.get(item, `${starts ? `${starts}.` : ""}${nextValue}`);
+
+  if (remainingValues.length) {
+    return buildProperty(newItem, remainingValues);
+  }
+
+  return newItem;
+};
+
+export const filterData = (filterableData, selectedFilters, facets) =>
+  filterableData.filter(item => {
+    const matchedFilters = selectedFilters.filter(filter => {
+      const [facet] = facets.filter(facet => facet.key === filter.key);
+      if (facet.properties) {
+        const property = buildProperty(item, facet.properties, filter.key);
+
+        if (Array.isArray(property) {
+          return _.includes(property, filter.value);
+        }
+
+        return property === filter.value;
+      }
+
+      return item[filter.key] === filter.value;
+    });
+
+    return matchedFilters.length === selectedFilters.length;
+  });
+
 export const useFilter = ({ filterableData, ...initialState }: Props) => {
   const [state, setState] = React.useState({
     ...initialState,
     selectedFilters: []
   });
-
-  const selectProperties = () => {};
-
-  const filterData = () =>
-    filterableData.filter(item => {
-      const matchedFilters = state.selectedFilters.filter(filter => {
-        const [facet] = state.facets.filter(fa => fa.key === filter.key);
-        if (facet.properties) {
-          // const property = item[filter.key][facet.properties[0]];
-          const [property] = facet.properties.reduce((acc, cV) => {
-            const thing = [...acc, item[filter.key][cV]];
-            console.log(thing);
-            return [...acc, item[filter.key][cV]];
-          }, []);
-          // console.log(property);
-          return property === filter.value;
-        }
-
-        return item[filter.key] === filter.value;
-      });
-
-      return matchedFilters.length === state.selectedFilters.length;
-    });
 
   const toggleSelectedFilter = (filter: { key: string; value: string }) => {
     const existingFilters = state.selectedFilters || [];
@@ -58,7 +74,15 @@ export const useFilter = ({ filterableData, ...initialState }: Props) => {
     });
   };
 
-  return { ...state, toggleSelectedFilter, filteredData: filterData() };
+  return {
+    ...state,
+    toggleSelectedFilter,
+    filteredData: filterData(
+      filterableData,
+      state.selectedFilters,
+      state.facets
+    )
+  };
 };
 
 export const Filter = ({
