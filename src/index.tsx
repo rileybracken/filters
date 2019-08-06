@@ -1,9 +1,11 @@
 import * as React from "react";
 import { render } from "react-dom";
-import _ from "lodash";
+import * as _ from "lodash";
 
 import "./styles.css";
 import { Filter } from "./useFilter";
+import Facets from "./Facets";
+import Comic from "./Comic";
 import comics from "./data";
 
 function App() {
@@ -40,60 +42,11 @@ function App() {
             maxWidth: "100%"
           }}
         >
-          <div style={{ flex: "1 1 50%", width: "50%" }}>
-            {facets.map(({ key, values }) => (
-              <div key={key}>
-                <h1>{_.capitalize(key)}</h1>
-
-                <div>
-                  {values.map(value => (
-                    <button
-                      key={value}
-                      onClick={() => toggleSelectedFilter({ key, value })}
-                    >
-                      {value}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          <Facets facets={facets} toggleSelectedFilter={toggleSelectedFilter} />
 
           <div style={{ flex: "1 1 50%", width: "50%" }}>
             <h1>{`Results (${filteredData.length || 0})`}</h1>
-            {filteredData &&
-              filteredData.map(({ series, format, creators, title }) => (
-                <div
-                  style={{
-                    background: "#f5f5f5",
-                    margin: "10px 0",
-                    padding: "10px 20px",
-                    overflow: "scroll"
-                  }}
-                >
-                  <h4>{title}</h4>
-                  <div>
-                    <strong>Series:</strong>
-                    &nbsp;{series.name}
-                  </div>
-                  <hr />
-                  <div>
-                    <strong>Format:</strong>
-                    &nbsp;{format}
-                  </div>
-                  <hr />
-                  <div>
-                    <div>
-                      <strong>Creators:</strong>
-                    </div>
-                    <ul>
-                      {creators.items.map(creator => (
-                        <li>{creator.name}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
+            {filteredData && filteredData.map(comic => <Comic {...comic} />)}
           </div>
         </div>
       )}

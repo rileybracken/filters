@@ -2,16 +2,15 @@ import * as React from "react";
 import * as _ from "lodash";
 
 interface Props {
-  facets?: Array<{
+  facets: Array<{
     key: string;
     values: Array<string>;
     properties?: Array<string>;
   }>;
   filterableData?: Array<any>;
-  filteredData?: Array<any>;
 }
 
-interface State {
+type State = Props & {
   selectedFilters: Array<{ key: string; values: Array<string> }>;
   filterableData?: Array<any>;
 }
@@ -88,5 +87,5 @@ export const useFilter = ({ filterableData, ...initialState }: Props) => {
 export const Filter = ({
   children,
   ...props
-}: Props & { children: (props: State) => React.ReactNode }) =>
+}: Props & { children: (props: State) => React.ReactElement }) =>
   children(useFilter(props));
